@@ -1,0 +1,52 @@
+name: MLflow Sync
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  sync-mlflow:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.8'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install mlflow pandas scikit-learn
+    
+    - name: Sync MLflow artifacts
+      run: |
+        python -c "
+        import mlflow
+        import os
+        
+        # Set MLflow tracking URI to local
+        mlflow.set_tracking_uri('file:///mlruns')
+        
+        # Get all experiments
+        experiments = mlflow.search_experiments()
+        
+        # Create artifacts directory if it doesn't exist
+        os.makedirs('github_artifacts', exist_ok=True)
+        
+        for experiment in experiments:
+            # Get all runs for the experiment
+            runs = mlflow.search_runs([experiment.experiment_id])
+            
+            # Save runs data
+            runs.to_csv(f'github_artifacts/{experiment.name}_runs.csv', index=False)
+        "
+    
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: mlflow-artifacts
+        path: github_artifacts/
