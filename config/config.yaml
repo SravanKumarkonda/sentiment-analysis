@@ -1,0 +1,25 @@
+data:
+  dataset_name: "imdb"
+  train_size: 0.8
+  random_state: 42
+
+model:
+  vectorizer:
+    max_features: 5000
+    min_df: 5
+    max_df: 0.7
+
+  classifier:
+    type: "logistic_regression"
+    params:
+      C: 1.0
+      max_iter: 1000
+
+mlflow:
+  tracking_uri: "http://sentiment-mlflow:5000"
+  experiment_name: "sentiment_analysis"
+  artifact_location: "/artifacts"
+
+api:
+  host: "0.0.0.0"
+  port: 8000
