@@ -10,10 +10,10 @@ jobs:
   sync-mlflow:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     
     - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v5
       with:
         python-version: '3.8'
     
@@ -51,7 +51,7 @@ jobs:
         "
     
     - name: Upload artifacts
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4  # Updated to v4
       with:
         name: mlflow-artifacts
         path: github_artifacts/
