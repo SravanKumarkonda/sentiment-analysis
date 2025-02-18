@@ -18,6 +18,20 @@ class TextPreprocessor:
         
         self.logger = logging.getLogger(__name__)
     
+    def get_params(self, deep=True):
+        """Get parameters for GridSearchCV compatibility"""
+        return {
+            'max_features': self.vectorizer.max_features,
+            'min_df': self.vectorizer.min_df,
+            'max_df': self.vectorizer.max_df
+        }
+    
+    def set_params(self, **parameters):
+        """Set parameters for GridSearchCV compatibility"""
+        for parameter, value in parameters.items():
+            setattr(self.vectorizer, parameter, value)
+        return self
+    
     def fit_transform(self, texts):
         """Fit and transform the text data"""
         try:
