@@ -1,0 +1,15 @@
+artifact_uri: mlflow-artifacts:/262787612595833079/549df635e2d34da8afef8b2ee9c1388f/artifacts
+end_time: 1739857924026
+entry_point_name: ''
+experiment_id: '262787612595833079'
+lifecycle_stage: active
+run_id: 549df635e2d34da8afef8b2ee9c1388f
+run_name: fun-crow-452
+run_uuid: 549df635e2d34da8afef8b2ee9c1388f
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1739857914343
+status: 3
+tags: []
+user_id: root

@@ -1,0 +1,14 @@
+aliases: []
+creation_timestamp: 1739514178516
+current_stage: None
+description: ''
+last_updated_timestamp: 1739514178516
+name: sentiment_classifier
+run_id: a3d3c0f819ef49d9b77646eaaf5948ea
+run_link: ''
+source: mlflow-artifacts:/262787612595833079/a3d3c0f819ef49d9b77646eaaf5948ea/artifacts/model
+status: READY
+status_message: null
+storage_location: mlflow-artifacts:/262787612595833079/a3d3c0f819ef49d9b77646eaaf5948ea/artifacts/model
+user_id: null
+version: 1

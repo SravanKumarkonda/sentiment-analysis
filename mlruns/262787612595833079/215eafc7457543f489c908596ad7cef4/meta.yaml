@@ -1,0 +1,15 @@
+artifact_uri: mlflow-artifacts:/262787612595833079/215eafc7457543f489c908596ad7cef4/artifacts
+end_time: 1739856632712
+entry_point_name: ''
+experiment_id: '262787612595833079'
+lifecycle_stage: active
+run_id: 215eafc7457543f489c908596ad7cef4
+run_name: abrasive-cub-326
+run_uuid: 215eafc7457543f489c908596ad7cef4
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1739856622511
+status: 3
+tags: []
+user_id: root
