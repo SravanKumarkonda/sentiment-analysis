@@ -5,6 +5,8 @@ import mlflow
 import mlflow.sklearn
 import yaml
 import logging
+import json
+import os
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from src.preprocessing.text_preprocessor import TextPreprocessor
 
@@ -13,14 +15,12 @@ class SentimentClassifier:
         with open(config_path, 'r') as f:
             self.config = yaml.safe_load(f)
             
-        # Create TextPreprocessor instance (not just the vprint("Starting hyperparameter tuning with these options:")
-        print(f"C values: {self.config['model']['classifier']['params']['C_options']}")
-        print(f"max_iter values: {self.config['model']['classifier']['params']['max_iter_options']}")
-        print(f"max_features values: {self.config['model']['vectorizer']['max_features_options']}")
+        # Create TextPreprocessor instance
+        text_preprocessor = TextPreprocessor(config_path)
         
         # Create pipeline
         self.pipeline = Pipeline([
-            ('vectorizer', TextPreprocessor(config_path).vectorizer),
+            ('vectorizer', text_preprocessor),
             ('classifier', LogisticRegression())
         ])
         
@@ -31,7 +31,7 @@ class SentimentClassifier:
             'vectorizer__max_features': self.config['model']['vectorizer']['max_features_options']
         }
         
-        print("Hyperparameter grid:", self.param_grid)  # Add this debug print
+        print("Hyperparameter grid:", self.param_grid)
         
         # Create GridSearchCV object
         self.model = GridSearchCV(
@@ -62,7 +62,6 @@ class SentimentClassifier:
         with mlflow.start_run():
             try:
                 print("Starting GridSearchCV with parameters:", self.param_grid)
-                print("Number of parameter combinations:", len(self.model.cv_results_['params']) if hasattr(self.model, 'cv_results_') else "Not fitted yet")
                 
                 # Train with grid search
                 self.model.fit(X_train, y_train)
@@ -103,9 +102,37 @@ class SentimentClassifier:
                     registered_model_name="sentiment_classifier"
                 )
                 
-                self.logger.info(f"Best parameters: {self.model.best_params_}")
-                self.logger.info(f"Best CV score: {self.model.best_score_}")
-                self.logger.info(f"Test metrics: {metrics}")
+                try:
+                    # Get absolute path
+                    current_dir = os.path.dirname(os.path.abspath(__file__))
+                    project_root = os.path.dirname(os.path.dirname(current_dir))
+                    results_path = os.path.join(project_root, 'src', 'results', 'model_results.json')
+                    
+                    print(f"Attempting to save results to: {results_path}")
+                    
+                    # Create directory if it doesn't exist
+                    results_dir = os.path.dirname(results_path)
+                    os.makedirs(results_dir, exist_ok=True)
+                    
+                    # Save results to JSON
+                    results = {
+                        'best_params': self.model.best_params_,
+                        'metrics': metrics,
+                        'all_results': {
+                            'params': [dict(p) for p in self.model.cv_results_['params']],
+                            'scores': self.model.cv_results_['mean_test_score'].tolist()
+                        }
+                    }
+                    
+                    with open(results_path, 'w') as f:
+                        json.dump(results, f, indent=4)
+                    
+                    print(f"Successfully saved results to {results_path}")
+                    self.logger.info(f"Saved results to {results_path}")
+                    
+                except Exception as e:
+                    print(f"Error saving results: {str(e)}")
+                    self.logger.error(f"Error saving results: {str(e)}")
                 
                 return metrics
                 

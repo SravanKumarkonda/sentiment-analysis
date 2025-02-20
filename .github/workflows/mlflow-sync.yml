@@ -18,25 +18,49 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install mlflow pandas scikit-learn
+        pip install pandas
     
-    - name: Create artifacts from MLflow
+    - name: Create MLflow artifacts
       run: |
         python -c "
-        import mlflow
         import pandas as pd
+        import json
+        import os
         
-        # Get MLflow experiment and runs
-        mlflow.set_tracking_uri('mlruns')  # Use local mlruns directory
-        experiment = mlflow.get_experiment_by_name('sentiment_analysis')
-        runs = mlflow.search_runs(experiment_ids=[experiment.experiment_id])
+        # Create artifacts directory
+        os.makedirs('github_artifacts', exist_ok=True)
         
-        # Save all runs data
-        runs.to_csv('github_artifacts/hyperparameter_tuning_results.csv', index=False)
-        
-        # Get best run (highest f1 score)
-        best_run = runs.sort_values('metrics.f1', ascending=False).iloc[0]
-        pd.DataFrame([best_run]).to_csv('github_artifacts/champion_model.csv', index=False)
+        try:
+            # Read the actual results from file
+            with open('src/results/model_results.json', 'r') as f:
+                results = json.load(f)
+            
+            # Create artifacts from actual results
+            best_run = {
+                'run_id': 'best_run',
+                'experiment_id': '1',
+                **results['best_params'],
+                **results['metrics']
+            }
+            
+            pd.DataFrame([best_run]).to_csv('github_artifacts/champion_model.csv', index=False)
+            
+            # Save all runs
+            all_runs = []
+            for params, score in zip(results['all_results']['params'], 
+                                   results['all_results']['scores']):
+                run_data = {
+                    'params': params,
+                    'score': score
+                }
+                all_runs.append(run_data)
+            
+            pd.DataFrame(all_runs).to_csv('github_artifacts/hyperparameter_tuning_results.csv', index=False)
+            print('Successfully created artifacts')
+            
+        except Exception as e:
+            print(f'Error creating artifacts: {str(e)}')
+            raise
         "
     
     - name: Upload artifacts

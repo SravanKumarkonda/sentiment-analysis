@@ -5,6 +5,10 @@ WORKDIR /app
 # Create cache directory for datasets
 RUN mkdir -p /root/.cache/huggingface/datasets
 
+# Create results directory with proper permissions
+RUN mkdir -p /app/src/results
+RUN chmod -R 777 /app/src/results
+
 # Copy requirements and install dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
